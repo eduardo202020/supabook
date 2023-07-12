@@ -3,15 +3,21 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
-import { Text as DefaultText, useColorScheme, View as DefaultView } from 'react-native';
+import {
+  Text as DefaultText,
+  useColorScheme,
+  View as DefaultView,
+  TextInput as DefaultTextInput,
+  Button as DefaultButton,
+} from "react-native";
 
-import Colors from '../constants/Colors';
+import Colors from "../constants/Colors";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme() ?? 'light';
+  const theme = useColorScheme() ?? "light";
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -26,19 +32,64 @@ type ThemeProps = {
   darkColor?: string;
 };
 
-export type TextProps = ThemeProps & DefaultText['props'];
-export type ViewProps = ThemeProps & DefaultView['props'];
+export type TextProps = ThemeProps & DefaultText["props"];
+export type ViewProps = ThemeProps & DefaultView["props"];
+export type TextInputProps = ThemeProps & DefaultTextInput["props"];
+export type ButtonProps = ThemeProps & DefaultButton["props"];
 
+// Text component
 export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
   return <DefaultText style={[{ color }, style]} {...otherProps} />;
 }
 
+// View component
 export function View(props: ViewProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+
+// Card component
+export function Card(props: ViewProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "card"
+  );
+  return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+}
+
+// Button component
+export function Button(props: DefaultButton["props"]) {
+  const color = useThemeColor({}, "primary");
+  return <DefaultButton color={color} {...props} />;
+}
+
+// TextInput component
+export function TextInput(props: DefaultTextInput["props"]) {
+  const { style, ...otherProps } = props;
+
+  const color = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "card");
+  const placeholdercolor = useThemeColor(
+    { light: "#6b7280", dark: "#9ca3af" },
+    "text"
+  );
+  const primary = useThemeColor({}, "primary");
+  return (
+    <DefaultTextInput
+      style={[{ backgroundColor, color, fontSize: 16, padding: 8 }, style]}
+      placeholderTextColor={placeholdercolor}
+      cursorColor={primary}
+      selectionColor={primary}
+      {...props}
+    />
+  );
 }
