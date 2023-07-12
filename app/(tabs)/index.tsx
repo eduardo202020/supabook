@@ -1,14 +1,52 @@
-import { StyleSheet } from 'react-native';
+// import "react-native-url-polyfill/auto";
 
-import EditScreenInfo from '../../components/EditScreenInfo';
-import { Text, View } from '../../components/Themed';
+import { FlatList, StyleSheet } from "react-native";
+
+import EditScreenInfo from "../../components/EditScreenInfo";
+import { Text, View } from "../../components/Themed";
+
+import { supabase } from "../../lib/supbase";
+import { useEffect, useState } from "react";
+import AddPostForm from "../../components/AddPostForm";
 
 export default function TabOneScreen() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const { data, error } = await supabase.from("posts").select("*");
+      if (error) {
+        console.log({ error });
+      } else {
+        setPosts(data);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  const handleSubmit = async (content: string) => {
+    // ejecuta el post
+    const { data, error } = await supabase
+      .from("posts")
+      .insert({ content })
+      .select();
+    if (error) {
+      console.log(error);
+    } else {
+      // de ejecutarse correctamente el post se añade a la ui
+      setPosts([data[0], ...posts]);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <AddPostForm onSubmit={handleSubmit} />
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Text>{item.content}</Text>}
+      />
     </View>
   );
 }
@@ -16,16 +54,16 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: '80%',
+    width: "80%",
   },
 });
