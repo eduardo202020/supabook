@@ -16,4 +16,8 @@ export const fetchPosts = async () => {
   }
 };
 
+// tipo para el array de posts
 export type Posts = Awaited<ReturnType<typeof fetchPosts>>;
+
+// tipo para un solo post
+export type Post = Posts[number];
