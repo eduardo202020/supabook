@@ -5,24 +5,16 @@ import { FlatList, StyleSheet } from "react-native";
 import EditScreenInfo from "../../components/EditScreenInfo";
 import { Text, View } from "../../components/Themed";
 
-import { supabase } from "../../lib/supbase";
+import { supabase } from "../../lib/supabase";
 import { useEffect, useState } from "react";
 import AddPostForm from "../../components/AddPostForm";
+import { Posts, fetchPosts } from "../../lib/api";
 
 export default function TabOneScreen() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Posts>([]);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const { data, error } = await supabase.from("posts").select("*");
-      if (error) {
-        console.log({ error });
-      } else {
-        setPosts(data);
-      }
-    };
-
-    fetchPosts();
+    fetchPosts().then((data) => setPosts(data));
   }, []);
 
   const handleSubmit = async (content: string) => {

@@ -6,7 +6,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "gen:types": "npx supabase gen types typescript --project-id uodmnqfikegvvtskklus > ./db_types.ts"
   },
   "jest": {
     "preset": "jest-expo"
