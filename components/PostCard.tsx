@@ -1,17 +1,21 @@
 import { StyleSheet, Image } from "react-native";
 import React from "react";
-import { Post } from "../lib/api";
+import type { Post, Profile } from "../lib/api";
 import { Card, Text, View, useThemeColor } from "./Themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { FontAwesome } from "@expo/vector-icons";
+import { useUserInfo } from "../lib/userContext";
 
 interface PostCardProps {
   post: Post;
+  onDelete: () => void;
 }
 
-const PostCard = ({ post }: PostCardProps) => {
+const PostCard = ({ post, onDelete }: PostCardProps) => {
   const color = useThemeColor({}, "primary");
+  const user = useUserInfo();
+  const profile = post.profile as Profile;
 
   return (
     <Card style={styles.container}>
@@ -21,7 +25,7 @@ const PostCard = ({ post }: PostCardProps) => {
           source={{ uri: "https://picsum.photos/200" }}
           style={styles.avatar}
         />
-        <Text style={styles.username}>John Doe</Text>
+        <Text style={styles.username}>{profile?.username}</Text>
       </Card>
       {/* Image */}
 
@@ -38,6 +42,11 @@ const PostCard = ({ post }: PostCardProps) => {
           <TouchableOpacity>
             <FontAwesome name="heart-o" size={24} color={color} />
           </TouchableOpacity>
+          {user?.profile?.id === post.user_id && (
+            <TouchableOpacity onPress={onDelete}>
+              <FontAwesome name="trash-o" size={24} color={color} />
+            </TouchableOpacity>
+          )}
         </Card>
       </Card>
     </Card>
@@ -82,5 +91,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingTop: 8,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 });

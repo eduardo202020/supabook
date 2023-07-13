@@ -8,16 +8,17 @@ import {
 } from "react";
 import { supabase } from "./supabase";
 import { useRouter, useSegments } from "expo-router";
+import { Profile } from "./api";
 
 // definir context para guardar el session y el profile
 export interface UserProfile {
-  username: string;
+  username: string | null;
   avatarUrl?: string;
 }
 
 export interface UserInfo {
   session: Session | null;
-  profile: UserProfile | null;
+  profile: Profile | null;
 }
 
 const UserContext = createContext<UserInfo>({

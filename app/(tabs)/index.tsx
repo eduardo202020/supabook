@@ -26,12 +26,23 @@ export default function TabOneScreen() {
     const { data, error } = await supabase
       .from("posts")
       .insert({ content })
-      .select();
+      .select("*, profile:profiles(username)");
     if (error) {
       console.log(error);
     } else {
       // de ejecutarse correctamente el post se añade a la ui
+      console.log({ data });
+
       setPosts([data[0], ...posts]);
+    }
+  };
+
+  const handleDeletePost = async (id: string) => {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+    if (error) {
+      console.log(error);
+    } else {
+      setPosts(posts.filter((post) => post.id !== id));
     }
   };
 
@@ -61,7 +72,9 @@ export default function TabOneScreen() {
           data={posts}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingTop: 8 }}
-          renderItem={({ item }) => <PostCard post={item} />}
+          renderItem={({ item }) => (
+            <PostCard post={item} onDelete={() => handleDeletePost(item.id)} />
+          )}
           showsVerticalScrollIndicator={false}
         />
       </View>
