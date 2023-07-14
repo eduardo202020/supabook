@@ -1,11 +1,10 @@
 import { StyleSheet } from "react-native";
 import { useState } from "react";
 
-import { Button, Text, View } from "../../components/Themed";
+import { View } from "../../components/Themed";
 import { supabase } from "../../lib/supabase";
 import { useUserInfo } from "../../lib/userContext";
 import ProfileForm from "../../components/ProfileForm";
-import { Profile } from "../../lib/api";
 
 export default function TabTwoScreen() {
   const { profile, loading, saveProfile } = useUserInfo();
