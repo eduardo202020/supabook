@@ -1,4 +1,5 @@
 import { Session } from "@supabase/supabase-js";
+import { Alert } from "react-native";
 import {
   createContext,
   ReactNode,
@@ -19,6 +20,8 @@ export interface UserProfile {
 export interface UserInfo {
   session: Session | null;
   profile: Profile | null;
+  loading?: boolean;
+  saveProfile?: (updatedProfile: Profile) => void;
 }
 
 const UserContext = createContext<UserInfo>({
@@ -56,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile: null,
   });
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUserInfo({ ...userInfo, session });
@@ -82,10 +87,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getProfile();
   }, [userInfo.session]);
 
+  const saveProfile = async (updatedProfile: Profile) => {
+    setLoading(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update(updatedProfile)
+      .eq("id", userInfo.profile?.id);
+    if (error) {
+      Alert.alert("Server Error", error.message);
+    } else {
+      getProfile();
+    }
+
+    setLoading(false);
+  };
+
   useProtectedRoute(userInfo);
 
   return (
-    <UserContext.Provider value={userInfo}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ ...userInfo, loading, saveProfile }}>
+      {children}
+    </UserContext.Provider>
   );
 }
 

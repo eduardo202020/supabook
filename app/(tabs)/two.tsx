@@ -1,15 +1,23 @@
 import { StyleSheet } from "react-native";
+import { useState } from "react";
 
 import { Button, Text, View } from "../../components/Themed";
 import { supabase } from "../../lib/supabase";
 import { useUserInfo } from "../../lib/userContext";
+import ProfileForm from "../../components/ProfileForm";
+import { Profile } from "../../lib/api";
 
 export default function TabTwoScreen() {
-  const { profile } = useUserInfo();
+  const { profile, loading, saveProfile } = useUserInfo();
+
   return (
     <View style={styles.container}>
-      <Text>{profile?.username}</Text>
-      <Button title={"Sign out"} onPress={() => supabase.auth.signOut()} />
+      <ProfileForm
+        profile={profile}
+        loading={loading!}
+        onSave={saveProfile!}
+        onLogout={() => supabase.auth.signOut()}
+      />
     </View>
   );
 }
