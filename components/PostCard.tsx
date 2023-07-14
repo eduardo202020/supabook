@@ -1,11 +1,12 @@
 import { StyleSheet, Image } from "react-native";
-import React from "react";
-import type { Post, Profile } from "../lib/api";
+import React, { useEffect, useState } from "react";
+import { downloadAvatar, type Post, type Profile } from "../lib/api";
 import { Card, Text, View, useThemeColor } from "./Themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 import { FontAwesome } from "@expo/vector-icons";
 import { useUserInfo } from "../lib/userContext";
+import Avatar from "./Avatar";
 
 interface PostCardProps {
   post: Post;
@@ -17,14 +18,19 @@ const PostCard = ({ post, onDelete }: PostCardProps) => {
   const user = useUserInfo();
   const profile = post.profile as Profile;
 
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  useEffect(() => {
+    if (profile.avatar_url) {
+      downloadAvatar(profile.avatar_url).then(setAvatarUrl);
+    }
+  }, [profile]);
+
   return (
     <Card style={styles.container}>
       {/* Header  */}
       <Card style={styles.header}>
-        <Image
-          source={{ uri: "https://picsum.photos/200" }}
-          style={styles.avatar}
-        />
+        <Avatar uri={avatarUrl} />
         <Text style={styles.username}>{profile?.username}</Text>
       </Card>
       {/* Image */}
@@ -65,14 +71,10 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingHorizontal: 16,
   },
-  avatar: {
-    height: 32,
-    width: 32,
-    borderRadius: 16,
-    marginRight: 8,
-  },
+
   username: {
     fontWeight: "bold",
+    marginLeft: 8,
   },
   imageContainer: {
     width: "100%",

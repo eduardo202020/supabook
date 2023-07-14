@@ -26,13 +26,11 @@ export default function TabOneScreen() {
     const { data, error } = await supabase
       .from("posts")
       .insert({ content })
-      .select("*, profile:profiles(username)");
+      .select("*, profile:profiles(username,avatar_url)");
     if (error) {
       console.log(error);
     } else {
       // de ejecutarse correctamente el post se añade a la ui
-      console.log({ data });
-
       setPosts([data[0], ...posts]);
     }
   };
