@@ -40,6 +40,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="contacts"
+        options={{
+          title: "chats",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="comment" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
