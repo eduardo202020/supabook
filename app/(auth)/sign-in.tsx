@@ -10,7 +10,6 @@ import { useUserInfo } from "../../lib/userContext";
 
 export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
-  const userInfo = useUserInfo();
 
   const handleSignup = async (credentials: SignUpWithPasswordCredentials) => {
     if (!("email" in credentials)) return;

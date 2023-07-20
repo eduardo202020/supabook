@@ -6,6 +6,12 @@ import type {
   SignInWithPasswordCredentials,
   SignUpWithPasswordCredentials,
 } from "@supabase/supabase-js";
+import { useUserInfo } from "../lib/userContext";
+
+import * as WebBrowser from "expo-web-browser";
+import * as SecureStore from "expo-secure-store";
+
+import * as Linking from "expo-linking";
 
 interface AuthFormProps {
   onSignUp: (credentials: SignUpWithPasswordCredentials) => void;
@@ -22,6 +28,10 @@ export default function AuthForm({
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading2, setLoading2] = useState(false);
+  const [linkState, setlinkState] = useState("");
+
+  const { setOAuthSession, getGoogleOAuthUrl } = useUserInfo();
 
   const handleSubmit = () => {
     if (mode === "login") {
@@ -29,6 +39,69 @@ export default function AuthForm({
     } else {
       onSignUp({ email, password, options: { data: { username } } });
     }
+  };
+
+  const onSignInWithGoogle = async () => {
+    setLoading2(true);
+    try {
+      const url = await getGoogleOAuthUrl!();
+      if (!url) return;
+      console.log({ url });
+
+      const link = Linking.createURL("/Home");
+      setlinkState(link);
+      // console.log({ link });
+
+      const result = await WebBrowser.openAuthSessionAsync(
+        url,
+        // "exp://127.0.0.1:19000/",
+        // "mysupabaseappv2://google-auth?",
+        // link,
+        "supabook://home/?",
+        // "https://www.facebook.com/",
+        // "exp://128.0.0.1:8081/--/google-auth",
+        {
+          showInRecents: true,
+        }
+      );
+      console.log({ result });
+      // console.log(Linking.createURL("google-auth"));
+
+      if (result.type === "success") {
+        const data = extractParamsFromUrl(result.url);
+
+        if (!data.access_token || !data.refresh_token) return;
+
+        setOAuthSession!({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
+
+        // You can optionally store Google's access token if you need it later
+        SecureStore.setItemAsync(
+          "google-access-token",
+          JSON.stringify(data.provider_token)
+        );
+      }
+    } catch (error) {
+      // Handle error here
+      console.log(error);
+    } finally {
+      setLoading2(false);
+    }
+  };
+
+  const extractParamsFromUrl = (url: string) => {
+    const params = new URLSearchParams(url.split("#")[1]);
+    const data = {
+      access_token: params.get("access_token"),
+      expires_in: parseInt(params.get("expires_in") || "0"),
+      refresh_token: params.get("refresh_token"),
+      token_type: params.get("token_type"),
+      provider_token: params.get("provider_token"),
+    };
+
+    return data;
   };
 
   return (
@@ -80,6 +153,11 @@ export default function AuthForm({
             onPress={() => setMode(mode === "login" ? "signUp" : "login")}
           />
         </View>
+        <Button
+          disabled={loading}
+          onPress={() => onSignInWithGoogle()}
+          title={loading ? "Loading..." : "Sign in with Google"}
+        ></Button>
       </View>
     </SafeAreaView>
   );

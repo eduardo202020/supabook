@@ -39,8 +39,8 @@ export const downloadAvatar = async (path: string): Promise<string> => {
       };
     });
   } catch (err) {
-    console.log("error", err);
-    return "";
+    console.log("error avatar", err);
+    return "https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIyLTA0L3BmLWljb240LWppcjIwNjItcG9yLWwtam9iNzg4LnBuZw.png";
   }
 };
 
@@ -51,7 +51,7 @@ export const fetchLikes = async (postId: string) => {
     .eq("post_id", postId);
 
   if (error) {
-    console.log("error", error);
+    console.log("error ", error);
     return [];
   } else {
     return data;
@@ -67,7 +67,7 @@ export const fetchContacts = async (userId: string) => {
     .select("username, avatar_url, id")
     .neq("id", userId);
   if (error) {
-    console.log("error", error);
+    console.log("error fetch cont", error);
     return [];
   } else {
     return data;

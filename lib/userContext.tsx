@@ -22,11 +22,18 @@ export interface UserInfo {
   profile: Profile | null;
   loading?: boolean;
   saveProfile?: (updatedProfile: Profile, avatarUpdated: boolean) => void;
+  getGoogleOAuthUrl?: () => Promise<string | null>;
+  setOAuthSession?: (tokens: {
+    access_token: string;
+    refresh_token: string;
+  }) => Promise<void>;
 }
 
 const UserContext = createContext<UserInfo>({
   session: null,
   profile: null,
+  getGoogleOAuthUrl: async () => "",
+  setOAuthSession: async () => {},
 });
 
 function useProtectedRoute(user: any) {
@@ -57,7 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfo>({
     session: null,
     profile: null,
+    getGoogleOAuthUrl: async () => "",
+    setOAuthSession: async () => {},
   });
+  const [isLoggedIn, setLoggedIn] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -81,6 +91,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       setUserInfo({ ...userInfo, profile: data[0] });
     }
+  };
+
+  const getGoogleOAuthUrl = async (): Promise<string | null> => {
+    const result = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "supabook://home",
+      },
+    });
+    console.log({ result });
+
+    return result.data.url;
+  };
+
+  const setOAuthSession = async (tokens: {
+    access_token: string;
+    refresh_token: string;
+  }) => {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+    });
+
+    if (error) throw error;
+
+    setLoggedIn(data.session !== null);
   };
 
   useEffect(() => {
@@ -137,7 +173,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useProtectedRoute(userInfo);
 
   return (
-    <UserContext.Provider value={{ ...userInfo, loading, saveProfile }}>
+    <UserContext.Provider
+      value={{
+        ...userInfo,
+        loading,
+        saveProfile,
+        setOAuthSession,
+        getGoogleOAuthUrl,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
