@@ -9,7 +9,9 @@ import { Stack, useSearchParams } from "expo-router";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState<Messages>([]);
-  const { profile: user } = useUserInfo();
+  const {
+    user: { profile: user },
+  } = useUserInfo();
   const { contact = "", contactId = "" } = useSearchParams();
 
   useEffect(() => {
