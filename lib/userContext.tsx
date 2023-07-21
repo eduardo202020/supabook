@@ -20,23 +20,30 @@ export interface UserProfile {
 export interface UserInfo {
   session: Session | null;
   profile: Profile | null;
-  loading?: boolean;
+}
+type SupabaseContextProps = {
+  isLoggedIn: boolean;
+  user: UserInfo;
+  loading: boolean;
   saveProfile?: (updatedProfile: Profile, avatarUpdated: boolean) => void;
-  getGoogleOAuthUrl?: () => Promise<string | null>;
-  setOAuthSession?: (tokens: {
+  signOut: () => Promise<void>;
+  getGoogleOAuthUrl: () => Promise<string | null>;
+  setOAuthSession: (tokens: {
     access_token: string;
     refresh_token: string;
   }) => Promise<void>;
-}
+};
 
-const UserContext = createContext<UserInfo>({
-  session: null,
-  profile: null,
+const UserContext = createContext<SupabaseContextProps>({
+  user: { session: null, profile: null },
+  loading: false,
   getGoogleOAuthUrl: async () => "",
   setOAuthSession: async () => {},
+  isLoggedIn: false,
+  signOut: async () => {},
 });
 
-function useProtectedRoute(user: any) {
+function useProtectedRoute(user: UserInfo) {
   const segments = useSegments();
   const router = useRouter();
 
@@ -64,11 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userInfo, setUserInfo] = useState<UserInfo>({
     session: null,
     profile: null,
-    getGoogleOAuthUrl: async () => "",
-    setOAuthSession: async () => {},
   });
-  const [isLoggedIn, setLoggedIn] = useState(false);
-
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -80,19 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const getProfile = async () => {
-    if (!userInfo.session) return;
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userInfo.session.user.id);
-    if (error) {
-      console.log(error);
-    } else {
-      setUserInfo({ ...userInfo, profile: data[0] });
-    }
-  };
-
+  // login with google
   const getGoogleOAuthUrl = async (): Promise<string | null> => {
     const result = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -100,7 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         redirectTo: "supabook://home",
       },
     });
-    console.log({ result });
 
     return result.data.url;
   };
@@ -114,9 +105,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refresh_token: tokens.refresh_token,
     });
 
-    if (error) throw error;
+    if (error) {
+      Alert.alert(error.message);
+    }
 
-    setLoggedIn(data.session !== null);
+    setIsLoggedIn(data.session !== null);
+  };
+  /////////
+
+  // obtiene los datos del profile cada vez que este cambia
+  const getProfile = async () => {
+    if (!userInfo.session) return;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userInfo.session.user.id);
+    if (error) {
+      console.log(error);
+    } else {
+      setUserInfo({ ...userInfo, profile: data[0] });
+    }
   };
 
   useEffect(() => {
@@ -172,14 +180,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useProtectedRoute(userInfo);
 
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    setUserInfo({ profile: null, session: null });
+    setIsLoggedIn(false);
+
+    if (error) throw error;
+  }
+
   return (
     <UserContext.Provider
       value={{
-        ...userInfo,
-        loading,
+        user: userInfo,
         saveProfile,
         setOAuthSession,
         getGoogleOAuthUrl,
+        isLoggedIn,
+        signOut,
+        loading,
       }}
     >
       {children}

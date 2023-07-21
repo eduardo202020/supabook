@@ -22,7 +22,7 @@ interface PostCardProps {
 
 const PostCard = ({ post, onDelete }: PostCardProps) => {
   const color = useThemeColor({}, "primary");
-  const user = useUserInfo();
+  const { user } = useUserInfo();
   const profile = post.profile as Profile;
 
   const [avatarUrl, setAvatarUrl] = useState("");

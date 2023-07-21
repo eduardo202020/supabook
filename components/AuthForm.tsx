@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { SafeAreaView, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, SafeAreaView, StyleSheet } from "react-native";
 import { Button, Text, TextInput, View } from "./Themed";
 
 import type {
@@ -24,14 +24,20 @@ export default function AuthForm({
   onLogin,
   loading,
 }: AuthFormProps) {
+  const { setOAuthSession, getGoogleOAuthUrl, isLoggedIn, user } =
+    useUserInfo();
+
   const [mode, setMode] = useState<"login" | "signUp">("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading2, setLoading2] = useState(false);
   const [linkState, setlinkState] = useState("");
+  const [currentUser, setcurrentUser] = useState(
+    user.profile?.username! + user.profile?.full_name
+  );
 
-  const { setOAuthSession, getGoogleOAuthUrl } = useUserInfo();
+  const [isLoggedInv2, setisLoggedIn] = useState(isLoggedIn);
 
   const handleSubmit = () => {
     if (mode === "login") {
@@ -57,7 +63,7 @@ export default function AuthForm({
         // "exp://127.0.0.1:19000/",
         // "mysupabaseappv2://google-auth?",
         // link,
-        "supabook://home/?",
+        "supabook://home",
         // "https://www.facebook.com/",
         // "exp://128.0.0.1:8081/--/google-auth",
         {
@@ -78,14 +84,15 @@ export default function AuthForm({
         });
 
         // You can optionally store Google's access token if you need it later
-        SecureStore.setItemAsync(
-          "google-access-token",
-          JSON.stringify(data.provider_token)
-        );
+        // SecureStore.setItemAsync(
+        //   "google-access-token",
+        //   JSON.stringify(data.provider_token)
+        // );
       }
-    } catch (error) {
+    } catch (error: any) {
       // Handle error here
-      console.log(error);
+      // console.log(error);
+      Alert.alert(error.message);
     } finally {
       setLoading2(false);
     }
@@ -103,6 +110,14 @@ export default function AuthForm({
 
     return data;
   };
+
+  useEffect(() => {
+    WebBrowser.warmUpAsync();
+
+    return () => {
+      WebBrowser.coolDownAsync();
+    };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -154,10 +169,12 @@ export default function AuthForm({
           />
         </View>
         <Button
-          disabled={loading}
+          disabled={loading2}
           onPress={() => onSignInWithGoogle()}
-          title={loading ? "Loading..." : "Sign in with Google"}
-        ></Button>
+          title={loading2 ? "Loading2..." : "Sign in with Google"}
+        />
+        <Text style={{ color: "red" }}>{isLoggedInv2}</Text>
+        <Text>{currentUser}</Text>
       </View>
     </SafeAreaView>
   );

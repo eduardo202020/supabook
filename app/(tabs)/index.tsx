@@ -14,7 +14,7 @@ import { Tabs } from "expo-router";
 
 export default function TabOneScreen() {
   const [posts, setPosts] = useState<Posts>([]);
-  const { profile } = useUserInfo();
+  const { user } = useUserInfo();
   const color = useThemeColor({}, "primary");
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function TabOneScreen() {
                 fontSize: 20,
               }}
             >
-              {profile?.username ?? ""}
+              {user.profile?.username ?? ""}
             </Text>
           ),
         }}

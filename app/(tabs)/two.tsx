@@ -7,13 +7,17 @@ import { useUserInfo } from "../../lib/userContext";
 import ProfileForm from "../../components/ProfileForm";
 
 export default function TabTwoScreen() {
-  const { profile, loading, saveProfile } = useUserInfo();
+  const {
+    user: { profile },
+    saveProfile,
+    loading,
+  } = useUserInfo();
 
   return (
     <View style={styles.container}>
       <ProfileForm
         profile={profile}
-        loading={loading!}
+        loading={loading}
         onSave={saveProfile!}
         onLogout={() => supabase.auth.signOut()}
       />
