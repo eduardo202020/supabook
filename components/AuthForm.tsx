@@ -173,7 +173,9 @@ export default function AuthForm({
           onPress={() => onSignInWithGoogle()}
           title={loading2 ? "Loading2..." : "Sign in with Google"}
         />
-        <Text style={{ color: "red" }}>{isLoggedInv2}</Text>
+        <Text>IsLoggedIn?: </Text>
+        <Text>{isLoggedInv2}</Text>
+        <Text>Current User:</Text>
         <Text>{currentUser}</Text>
       </View>
     </SafeAreaView>
