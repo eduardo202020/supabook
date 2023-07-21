@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "supabook://home",
+        redirectTo: "supabook://",
       },
     });
 

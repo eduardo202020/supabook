@@ -63,7 +63,7 @@ export default function AuthForm({
         // "exp://127.0.0.1:19000/",
         // "mysupabaseappv2://google-auth?",
         // link,
-        "supabook://home",
+        "supabook://",
         // "https://www.facebook.com/",
         // "exp://128.0.0.1:8081/--/google-auth",
         {
