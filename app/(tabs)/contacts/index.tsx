@@ -7,7 +7,9 @@ import { Stack, useRouter } from "expo-router";
 
 export default function ContactsScreen() {
   const [contacts, setContacts] = useState<Contacts>([]);
-  const { profile } = useUserInfo();
+  const {
+    user: { profile },
+  } = useUserInfo();
 
   const router = useRouter();
 
